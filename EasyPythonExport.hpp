@@ -178,16 +178,18 @@ namespace easy_python_export_helper
 		easy_python_export_helper::PythonExportCollector collector(\
 			normal_methods,\
 			type_class\
-		);
+		);\
+		auto module_str = _PYTHON_EXPORT_HELPER_STRING(module);\
+		auto cls_str = _PYTHON_EXPORT_HELPER_STRING(cls);
 
-#define END_EXPORT_PYTHON_CLASS(module, cls)\
+#define END_EXPORT_PYTHON_CLASS()\
 		collector.flush();\
-		PyObject *module_inst = Py_InitModule3(_PYTHON_EXPORT_HELPER_STRING(module), nullptr, nullptr);\
+		PyObject *module_inst = Py_InitModule3(module_str, nullptr, nullptr);\
 		assert(module_inst);\
 		if (PyType_Ready(&type_class) < 0)\
 			assert(false);\
 		Py_INCREF(&type_class);\
-		PyModule_AddObject(module_inst, _PYTHON_EXPORT_HELPER_STRING(cls),\
+		PyModule_AddObject(module_inst, cls_str,\
 			(PyObject *)&type_class);\
 	}
 
