@@ -15,14 +15,15 @@ as little as code to writen, and decoupling logic and export.
 With EasyPythonExport, you can write such code to export C++ Python
 
 
+```C++
 //main.cpp
 #include "EasyPythonExport.hpp"
 // excute this in some function to export class to module
 // this will not change anymore
 INIT_EXPORT_PYTHON(module, class);
+```
 
-
-
+```C++
 #include "EasyPythonExport.hpp"
 // some other file
 // export define. export test1-7 functions
@@ -35,5 +36,5 @@ BEGIN_EXPORT_PYTHON_CLASS(module, class)
 	ADD_METHOD(test6)
 	ADD_METHOD(test7)// and new functions test7
 END_EXPORT_PYTHON_CLASS(module, class)
-
+```
 
