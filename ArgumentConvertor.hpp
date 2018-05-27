@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include "Python.h"
 
 namespace easy_python_export_helper
 {

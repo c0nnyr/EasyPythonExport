@@ -20,21 +20,16 @@ With EasyPythonExport, you can write such code to export C++ Python
 #include "EasyPythonExport.hpp"
 // excute this in some function to export class to module
 // this will not change anymore
-INIT_EXPORT_PYTHON(module, class);
+EXPORT_PYTHON(module, class);
 ```
 
 ```C++
 #include "EasyPythonExport.hpp"
 // some other file
-// export define. export test1-7 functions
-BEGIN_EXPORT_PYTHON_CLASS(module, class)
-	ADD_METHOD(test1)
-	ADD_METHOD(test2)
-	ADD_METHOD(test3)
-	ADD_METHOD(test4)
-	ADD_METHOD(test5)
-	ADD_METHOD(test6)
-	ADD_METHOD(test7)// and new functions test7
-END_EXPORT_PYTHON_CLASS(module, class)
+// export define. export test functions
+BEGIN_DEFINE_EXPORT_PYTHON_CLASS(module, class)
+	ADD_METHOD(test)// and new functions test
+	ADD_METHOD_STATIC(test_static)//and
+END_DEFINE_EXPORT_PYTHON_CLASS(module, class)
 ```
 
