@@ -109,7 +109,7 @@ namespace easy_python_export_helper
 }
 
 
-#define INIT_EXPORT_PYTHON(module, cls)\
+#define EXPORT_PYTHON(module, cls)\
 	extern void _PYTHON_EXPORT_HELPER_INIT_NAME(module, cls)();\
 	_PYTHON_EXPORT_HELPER_INIT_NAME(module, cls)();
 
@@ -120,7 +120,7 @@ namespace easy_python_export_helper
 	METH_VARARGS,\
 	""});
 
-#define BEGIN_EXPORT_PYTHON_CLASS(module, cls)\
+#define BEGIN_DEFINE_EXPORT_PYTHON_CLASS(module, cls)\
 	namespace easy_python_export\
 	{\
 		struct _PYTHON_EXPORT_HELPER_PYTHON_CLASS_NAME(module, cls) : PyObject\
@@ -182,7 +182,7 @@ namespace easy_python_export_helper
 		auto module_str = _PYTHON_EXPORT_HELPER_STRING(module);\
 		auto cls_str = _PYTHON_EXPORT_HELPER_STRING(cls);
 
-#define END_EXPORT_PYTHON_CLASS()\
+#define END_DEFINE_EXPORT_PYTHON_CLASS()\
 		collector.flush();\
 		PyObject *module_inst = Py_InitModule3(module_str, nullptr, nullptr);\
 		assert(module_inst);\

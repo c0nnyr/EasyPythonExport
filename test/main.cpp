@@ -28,7 +28,7 @@ int main(int argc, const char * argv[])
     std::cout<<"hello world"<<std::endl;
     Py_Initialize();
     PyRun_SimpleString("import sys;sys.path.append('./')");
-    INIT_EXPORT_PYTHON(testmodule, testclass);
+    EXPORT_PYTHON(testmodule, testclass);
     PyRun_SimpleString(pystr);
     Py_Finalize();
     return 0;

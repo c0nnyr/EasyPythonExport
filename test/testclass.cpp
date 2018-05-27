@@ -35,7 +35,7 @@ void testclass::test7(const std::string &a)
 
 
 //apply
-BEGIN_EXPORT_PYTHON_CLASS(testmodule, testclass)
+BEGIN_DEFINE_EXPORT_PYTHON_CLASS(testmodule, testclass)
     ADD_METHOD(test1)
     ADD_METHOD(test2)
     ADD_METHOD(test3)
@@ -43,4 +43,4 @@ BEGIN_EXPORT_PYTHON_CLASS(testmodule, testclass)
     ADD_METHOD(test5)
     ADD_METHOD(test6)
     ADD_METHOD(test7)
-END_EXPORT_PYTHON_CLASS()
+END_DEFINE_EXPORT_PYTHON_CLASS()
