@@ -59,6 +59,68 @@ namespace easy_python_export_helper
         }
     };
     template <>
+    class Convertor<float>
+    {
+    public:
+        using T=float;
+        using CONST_T_REF = const T&;
+        static CONST_T_REF convertFromPyObject(PyObject *obj)
+        {
+            if (!PyFloat_CheckExact(obj))
+            {
+                assert(false);
+                return CONST_T_REF(0);
+            }
+            return CONST_T_REF(PyFloat_AsDouble(obj));
+        }
+        static PyObject *convertToPyObject(CONST_T_REF t)
+        {
+            return PyFloat_FromDouble(t);
+        }
+    };
+    template <>
+    class Convertor<double>
+    {
+    public:
+        using T=double;
+        using CONST_T_REF = const T&;
+        static CONST_T_REF convertFromPyObject(PyObject *obj)
+        {
+            if (!PyFloat_CheckExact(obj))
+            {
+                assert(false);
+                return CONST_T_REF(0);
+            }
+            return CONST_T_REF(PyFloat_AsDouble(obj));
+        }
+        static PyObject *convertToPyObject(CONST_T_REF t)
+        {
+            return PyFloat_FromDouble(t);
+        }
+    };
+    template <>
+    class Convertor<bool>
+    {
+    public:
+        using T=bool;
+        using CONST_T_REF = const T&;
+        static CONST_T_REF convertFromPyObject(PyObject *obj)
+        {
+            if (obj != Py_False && obj != Py_True)
+            {
+                assert(false);
+                return CONST_T_REF(false);
+            }
+            return CONST_T_REF(obj != Py_False);
+        }
+        static PyObject *convertToPyObject(CONST_T_REF t)
+        {
+            auto ret = t ? Py_True : Py_False;
+			Py_INCREF(ret);
+			return ret;
+        }
+    };
+    template <>
     class Convertor<std::string>
     {
     public:

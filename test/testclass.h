@@ -10,7 +10,10 @@ public:
     void test4();
     //int& should not be used
     void test5(const int&);
-    void test6(const char*);
+    const char* test6(const char*);
     void test7(const std::string &);
+    std::string test8();
+    bool test9(bool);
+    double test10(float);
 };
 #endif

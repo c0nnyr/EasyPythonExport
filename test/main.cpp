@@ -21,6 +21,9 @@ print a.test4();\
 print a.test5(5);\
 print a.test6('hello test6');\
 print a.test7('hello test7');\
+print a.test8();\
+print a.test9(False);\
+print a.test10(11.1123);\
 ";
 
 int main(int argc, const char * argv[])
