@@ -32,9 +32,10 @@ print a.Property2;\
 a.Property2 = 1988;\
 print a.Property3;\
 a.Property3 = 2988;\
-print testmodule.testclass.Property3;\
-testmodule.testclass.Property3 = 999;\
 ";
+// NOT SUPPORTED NOW
+//print testmodule.testclass.Property3;\
+//testmodule.testclass.Property3 = 999;\
 
 
 int main(int argc, const char * argv[])
