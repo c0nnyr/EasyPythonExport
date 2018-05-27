@@ -2,6 +2,7 @@
 #define ARGUMENT_CONVERTOR_HPP
 
 #include <string>
+#include <iostream>
 
 namespace easy_python_export_helper
 {
@@ -29,11 +30,13 @@ namespace easy_python_export_helper
         static PureType convertFromPyObject(PyObject *obj, int &param_ind)
         {
             assert(PyTuple_GET_SIZE(obj) > param_ind);
+			std::cout<<"==>typeid convertFromPyObject "<<typeid(T).name()<<" "<<typeid(PureType).name()<<std::endl;
             return Convertor<PureType>::convertFromPyObject(PyTuple_GetItem(obj, param_ind++));
         }
         
         static PyObject *convertToPyObject(PureType t)
         {
+			std::cout<<"==>typeid convertToPyObject "<<typeid(T).name()<<" "<<typeid(PureType).name()<<std::endl;
             return Convertor<PureType>::convertToPyObject(t);
         }
     };
