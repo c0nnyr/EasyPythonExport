@@ -37,67 +37,6 @@ namespace easy_python_export_helper
             return Convertor<PureType>::convertToPyObject(t);
         }
     };
-    
-    template <>
-    class Convertor<int>
-    {
-    public:
-        using T=int;
-        using CONST_T_REF = const T&;
-        static CONST_T_REF convertFromPyObject(PyObject *obj)
-        {
-            if (!PyInt_CheckExact(obj))
-            {
-                assert(false);
-                return CONST_T_REF(0);
-            }
-            return CONST_T_REF(PyInt_AsLong(obj));
-        }
-        static PyObject *convertToPyObject(CONST_T_REF t)
-        {
-            return PyInt_FromLong(t);
-        }
-    };
-    template <>
-    class Convertor<float>
-    {
-    public:
-        using T=float;
-        using CONST_T_REF = const T&;
-        static CONST_T_REF convertFromPyObject(PyObject *obj)
-        {
-            if (!PyFloat_CheckExact(obj))
-            {
-                assert(false);
-                return CONST_T_REF(0);
-            }
-            return CONST_T_REF(PyFloat_AsDouble(obj));
-        }
-        static PyObject *convertToPyObject(CONST_T_REF t)
-        {
-            return PyFloat_FromDouble(t);
-        }
-    };
-    template <>
-    class Convertor<double>
-    {
-    public:
-        using T=double;
-        using CONST_T_REF = const T&;
-        static CONST_T_REF convertFromPyObject(PyObject *obj)
-        {
-            if (!PyFloat_CheckExact(obj))
-            {
-                assert(false);
-                return CONST_T_REF(0);
-            }
-            return CONST_T_REF(PyFloat_AsDouble(obj));
-        }
-        static PyObject *convertToPyObject(CONST_T_REF t)
-        {
-            return PyFloat_FromDouble(t);
-        }
-    };
     template <>
     class Convertor<bool>
     {
@@ -120,8 +59,8 @@ namespace easy_python_export_helper
 			return ret;
         }
     };
-    template <>
-    class Convertor<std::string>
+    template <> 
+	class Convertor<std::string>
     {
     public:
         using T=std::string;
@@ -140,27 +79,37 @@ namespace easy_python_export_helper
             return PyString_FromString(t.c_str());
         }
     };
-    template <>
-    class Convertor<const char*>
-    {
-    public:
-        using T=const char*;
-        using CONST_T_REF = const T&;
-        static CONST_T_REF convertFromPyObject(PyObject *obj)
-        {
-            if (!PyString_CheckExact(obj))
-            {
-                assert(false);
-                return CONST_T_REF("");
-            }
-            return CONST_T_REF(PyString_AsString(obj));
-        }
-        static PyObject *convertToPyObject(CONST_T_REF t)
-        {
-            return PyString_FromString(t);
-        }
+#define SIMPLE_EXPORT_TEMPLATE(cpp_type, check_py, convert_from_py, convert_to_py, default_val)\
+    template <>\
+    class Convertor<cpp_type>\
+    {\
+    public:\
+        using T=cpp_type;\
+        using CONST_T_REF = const T&;\
+        static CONST_T_REF convertFromPyObject(PyObject *obj)\
+        {\
+            if (!check_py(obj))\
+            {\
+                assert(false);\
+                return CONST_T_REF(default_val);\
+            }\
+            return CONST_T_REF(convert_from_py(obj));\
+        }\
+		static PyObject *convertToPyObject(CONST_T_REF t)\
+        {\
+            return convert_to_py(t);\
+        }\
     };
+	SIMPLE_EXPORT_TEMPLATE(short, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(int, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(long, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(unsigned short, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(unsigned int, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(unsigned long, PyInt_CheckExact, PyInt_AsLong, PyInt_FromLong, 0)
+	SIMPLE_EXPORT_TEMPLATE(float, PyFloat_CheckExact, PyFloat_AsDouble, PyFloat_FromDouble, 0)
+	SIMPLE_EXPORT_TEMPLATE(double, PyFloat_CheckExact, PyFloat_AsDouble, PyFloat_FromDouble, 0)
+	SIMPLE_EXPORT_TEMPLATE(const char*, PyString_CheckExact, PyString_AsString, PyString_FromString, "")
 
-    
+#undef SIMPLE_EXPORT_TEMPLATE
 }
 #endif /* ARGUMENT_CONVERTOR_HPP */
