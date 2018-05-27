@@ -79,11 +79,62 @@ namespace easy_python_export_helper
     private:
         MethodType _method;
     };
+	// Normal functions. use DummyClass to make the interface consistent
+	class DummyClass{};
+	template <typename ReturnType, typename ...Arguments>
+	class FunctionWrapper<DummyClass, ReturnType, Arguments...>
+	{
+	public:
+		using MethodType = ReturnType (*)(Arguments...);
+		FunctionWrapper(MethodType method):_method(method)
+		{}
+		
+		PyObject* run(void *ptr, PyObject *argument)//ptr is of no use
+		{
+            if (!PyTuple_CheckExact(argument))
+            {
+                assert(false);
+                Py_RETURN_NONE;
+            }
+            int param_ind = 0;
+            return easy_python_export_helper::ConvertorInterface<ReturnType>::convertToPyObject(
+                _method(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...));
+		}
+	private:
+		MethodType _method;
+	};
+    template <typename ...Arguments>
+    class FunctionWrapper<DummyClass, void, Arguments...>
+    {
+    public:
+        using MethodType = void (*)(Arguments...);
+        FunctionWrapper(MethodType method):_method(method)
+        {}
+        
+        PyObject* run(void *ptr, PyObject *argument)//ptr is of no use
+        {
+            if (!PyTuple_CheckExact(argument))
+            {
+                assert(false);
+                Py_RETURN_NONE;
+            }
+            int param_ind = 0;
+            _method(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...);
+            Py_RETURN_NONE;
+        }
+    private:
+        MethodType _method;
+    };
     
     template <typename Cls, typename ReturnType, typename ...Arguments>
     FunctionWrapper<Cls, ReturnType, Arguments...> createFunctionWrapper(ReturnType (Cls::*method)(Arguments...))
     {
         return FunctionWrapper<Cls, ReturnType, Arguments...>(method);
+    }
+    template <typename ReturnType, typename ...Arguments>
+    FunctionWrapper<DummyClass, ReturnType, Arguments...> createFunctionWrapper(ReturnType (*method)(Arguments...))
+    {
+        return FunctionWrapper<DummyClass, ReturnType, Arguments...>(method);
     }
 }
 #define _PYTHON_EXPORT_HELPER_CONCATENATE(x, y) _PYTHON_EXPORT_HELPER_CONCATENATE2(x, y)
@@ -108,7 +159,6 @@ namespace easy_python_export_helper
     return easy_python_export_helper::createFunctionWrapper((&origin_class::func)).run(&((python_class*)self)->inst, argument);\
 }
 
-
 #define EXPORT_PYTHON(module, cls)\
 	extern void _PYTHON_EXPORT_HELPER_INIT_NAME(module, cls)();\
 	_PYTHON_EXPORT_HELPER_INIT_NAME(module, cls)();
@@ -118,6 +168,12 @@ namespace easy_python_export_helper
 	PyMethodDef{#func,\
     _PYTHON_EXPORT_HELPER_METHOD_WRAPPER(func),\
 	METH_VARARGS,\
+	""});
+#define ADD_METHOD_STATIC(func) \
+	collector.add(\
+	PyMethodDef{#func,\
+    _PYTHON_EXPORT_HELPER_METHOD_WRAPPER(func),\
+	METH_STATIC|METH_VARARGS,\
 	""});
 
 #define BEGIN_DEFINE_EXPORT_PYTHON_CLASS(module, cls)\

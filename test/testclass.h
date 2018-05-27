@@ -15,5 +15,6 @@ public:
     std::string test8();
     bool test9(bool);
     double test10(float);
+    static int test1_static(int);
 };
 #endif

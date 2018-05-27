@@ -47,6 +47,11 @@ double testclass::test10(float a)
     std::cout<<"test10 class print "<<a<<std::endl;
     return 123.123;
 }
+int testclass::test1_static(int a)
+{
+    std::cout<<"test1_static class print "<<a<<std::endl;
+    return 999;
+}
 
 
 //apply
@@ -61,4 +66,5 @@ BEGIN_DEFINE_EXPORT_PYTHON_CLASS(testmodule, testclass)
     ADD_METHOD(test8)
     ADD_METHOD(test9)
     ADD_METHOD(test10)
+    ADD_METHOD_STATIC(test1_static)
 END_DEFINE_EXPORT_PYTHON_CLASS()

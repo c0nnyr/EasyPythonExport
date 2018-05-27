@@ -24,7 +24,10 @@ print a.test7('hello test7');\
 print a.test8();\
 print a.test9(False);\
 print a.test10(11.1123);\
+print a.test1_static(11);\
+print testmodule.testclass.test1_static(22);\
 ";
+
 
 int main(int argc, const char * argv[])
 {
