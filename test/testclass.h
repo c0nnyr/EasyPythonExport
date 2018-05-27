@@ -16,5 +16,12 @@ public:
     bool test9(bool);
     double test10(float);
     static int test1_static(int);
+
+	int GetProperty1();
+	int GetProperty2();
+	void SetProperty2(int a);
+    
+    static int GetProperty3();
+    static void SetProperty3(int a);
 };
 #endif

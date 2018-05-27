@@ -26,6 +26,14 @@ print a.test9(False);\
 print a.test10(11.1123);\
 print a.test1_static(11);\
 print testmodule.testclass.test1_static(22);\
+print '==============property=========';\
+print a.Property1;\
+print a.Property2;\
+a.Property2 = 1988;\
+print a.Property3;\
+a.Property3 = 2988;\
+print testmodule.testclass.Property3;\
+testmodule.testclass.Property3 = 999;\
 ";
 
 

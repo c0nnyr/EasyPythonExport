@@ -35,6 +35,12 @@ namespace easy_python_export_helper
             return Convertor<PureType>::convertFromPyObject(PyTuple_GetItem(obj, param_ind++));
         }
         
+        static PureType convertFromPyObject(PyObject *obj)
+        {
+            std::cout<<"==>typeid convertFromPyObject "<<typeid(T).name()<<" "<<typeid(PureType).name()<<std::endl;
+            return Convertor<PureType>::convertFromPyObject(obj);
+        }
+        
         static PyObject *convertToPyObject(PureType t)
         {
 			std::cout<<"==>typeid convertToPyObject "<<typeid(T).name()<<" "<<typeid(PureType).name()<<std::endl;

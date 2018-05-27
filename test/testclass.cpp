@@ -52,6 +52,29 @@ int testclass::test1_static(int a)
     std::cout<<"test1_static class print "<<a<<std::endl;
     return 999;
 }
+int testclass::GetProperty1()
+{
+    std::cout<<"GetProperty1 class print "<<std::endl;
+    return 987;
+}
+int testclass::GetProperty2()
+{
+    std::cout<<"GetProperty2 class print "<<std::endl;
+    return 986;
+}
+void testclass::SetProperty2(int a)
+{
+    std::cout<<"SetProperty2 class print "<<a<<std::endl;
+}
+int testclass::GetProperty3()
+{
+    std::cout<<"GetProperty3 static print "<<std::endl;
+    return 1986;
+}
+void testclass::SetProperty3(int a)
+{
+    std::cout<<"SetProperty3 static class print "<<a<<std::endl;
+}
 
 
 //apply
@@ -67,4 +90,7 @@ BEGIN_DEFINE_EXPORT_PYTHON_CLASS(testmodule, testclass)
     ADD_METHOD(test9)
     ADD_METHOD(test10)
     ADD_METHOD_STATIC(test1_static)
+    ADD_PROPERTY_RO(Property1)
+    ADD_PROPERTY_RW(Property2)
+    ADD_PROPERTY_RW(Property3)
 END_DEFINE_EXPORT_PYTHON_CLASS()

@@ -11,15 +11,21 @@ namespace easy_python_export_helper
 	class PythonExportCollector
 	{
 	public:
-		using NormalMethods = std::vector<PyMethodDef>;
-		PythonExportCollector(NormalMethods &methods, PyTypeObject &type)
+		using Methods = std::vector<PyMethodDef>;
+		using Properties = std::vector<PyGetSetDef>;
+		PythonExportCollector(Methods &methods, Properties &properties, PyTypeObject &type)
 		:_methods(methods)
+		,_properties(properties)
 		,_type(type)
 		{}
 		
 		void add(const PyMethodDef &method)
 		{
 			_methods.push_back(method);
+		}
+		void add(const PyGetSetDef &property)
+		{
+			_properties.push_back(property);
 		}
 		
 		void flush()
@@ -29,9 +35,15 @@ namespace easy_python_export_helper
 				_methods.push_back(PyMethodDef{nullptr, nullptr, 0, nullptr});
 				_type.tp_methods = _methods.data();
 			}
+			if (!_properties.empty())
+			{
+				_properties.push_back(PyGetSetDef{nullptr, nullptr, nullptr, nullptr});
+				_type.tp_getset = _properties.data();
+			}
 		}
 	private:
-		NormalMethods &_methods;
+		Methods &_methods;
+		Properties &_properties;;
 		PyTypeObject &_type;
 	};
 
@@ -43,7 +55,7 @@ namespace easy_python_export_helper
 		FunctionWrapper(MethodType method):_method(method)
 		{}
 		
-		PyObject* run(Cls *ptr, PyObject *argument)
+		PyObject* runMethod(Cls *ptr, PyObject *argument)
 		{
             if (!PyTuple_CheckExact(argument))
             {
@@ -53,6 +65,10 @@ namespace easy_python_export_helper
             int param_ind = 0;
             return easy_python_export_helper::ConvertorInterface<ReturnType>::convertToPyObject(
                 (ptr->*_method)(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...));
+		}
+		PyObject* runGetProperty(Cls *ptr)
+		{
+			return easy_python_export_helper::ConvertorInterface<ReturnType>::convertToPyObject((ptr->*_method)());
 		}
 	private:
 		MethodType _method;
@@ -65,7 +81,7 @@ namespace easy_python_export_helper
         FunctionWrapper(MethodType method):_method(method)
         {}
         
-        PyObject* run(Cls *ptr, PyObject *argument)
+        PyObject* runMethod(Cls *ptr, PyObject *argument)
         {
             if (!PyTuple_CheckExact(argument))
             {
@@ -75,6 +91,12 @@ namespace easy_python_export_helper
             int param_ind = 0;
             (ptr->*_method)(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...);
             Py_RETURN_NONE;
+        }
+        int runSetProperty(Cls *ptr, PyObject *argument)
+        {
+			assert(sizeof...(Arguments) == 1);
+            (ptr->*_method)(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument)...);
+            return 0;
         }
     private:
         MethodType _method;
@@ -89,7 +111,7 @@ namespace easy_python_export_helper
 		FunctionWrapper(MethodType method):_method(method)
 		{}
 		
-		PyObject* run(void *ptr, PyObject *argument)//ptr is of no use
+		PyObject* runMethod(void *ptr, PyObject *argument)//ptr is of no use
 		{
             if (!PyTuple_CheckExact(argument))
             {
@@ -99,6 +121,10 @@ namespace easy_python_export_helper
             int param_ind = 0;
             return easy_python_export_helper::ConvertorInterface<ReturnType>::convertToPyObject(
                 _method(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...));
+		}
+		PyObject* runGetProperty(void *ptr)
+		{
+			return easy_python_export_helper::ConvertorInterface<ReturnType>::convertToPyObject(_method());
 		}
 	private:
 		MethodType _method;
@@ -111,7 +137,7 @@ namespace easy_python_export_helper
         FunctionWrapper(MethodType method):_method(method)
         {}
         
-        PyObject* run(void *ptr, PyObject *argument)//ptr is of no use
+        PyObject* runMethod(void *ptr, PyObject *argument)//ptr is of no use
         {
             if (!PyTuple_CheckExact(argument))
             {
@@ -121,6 +147,12 @@ namespace easy_python_export_helper
             int param_ind = 0;
             _method(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument, param_ind)...);
             Py_RETURN_NONE;
+        }
+        int runSetProperty(void *ptr, PyObject *argument)
+        {
+			assert(sizeof...(Arguments) == 1);
+            _method(easy_python_export_helper::ConvertorInterface<Arguments>::convertFromPyObject(argument)...);
+            return 0;
         }
     private:
         MethodType _method;
@@ -156,7 +188,17 @@ namespace easy_python_export_helper
 #define _PYTHON_EXPORT_HELPER_METHOD_WRAPPER(func)\
 [](PyObject *self, PyObject *argument)\
 {\
-    return easy_python_export_helper::createFunctionWrapper((&origin_class::func)).run(&((python_class*)self)->inst, argument);\
+    return easy_python_export_helper::createFunctionWrapper((&origin_class::func)).runMethod(&((python_class*)self)->inst, argument);\
+}
+#define _PYTHON_EXPORT_HELPER_PROPERTY_GET_METHOD_WRAPPER(func)\
+[](PyObject *self, void *)\
+{\
+    return easy_python_export_helper::createFunctionWrapper((&origin_class::func)).runGetProperty(&((python_class*)self)->inst);\
+}
+#define _PYTHON_EXPORT_HELPER_PROPERTY_SET_METHOD_WRAPPER(func)\
+[](PyObject *self, PyObject *argument, void *)\
+{\
+    return easy_python_export_helper::createFunctionWrapper((&origin_class::func)).runSetProperty(&((python_class*)self)->inst, argument);\
 }
 
 #define EXPORT_PYTHON(module, cls)\
@@ -175,6 +217,19 @@ namespace easy_python_export_helper
     _PYTHON_EXPORT_HELPER_METHOD_WRAPPER(func),\
 	METH_STATIC|METH_VARARGS,\
 	""});
+#define ADD_PROPERTY_RO(name) \
+	collector.add(\
+	PyGetSetDef{(char*)#name,\
+	_PYTHON_EXPORT_HELPER_PROPERTY_GET_METHOD_WRAPPER(_PYTHON_EXPORT_HELPER_CONCATENATE(Get, name)),\
+    nullptr,\
+	(char*)""});
+#define ADD_PROPERTY_RW(name) \
+	collector.add(\
+	PyGetSetDef{(char*)#name,\
+	_PYTHON_EXPORT_HELPER_PROPERTY_GET_METHOD_WRAPPER(_PYTHON_EXPORT_HELPER_CONCATENATE(Get, name)),\
+	_PYTHON_EXPORT_HELPER_PROPERTY_SET_METHOD_WRAPPER(_PYTHON_EXPORT_HELPER_CONCATENATE(Set, name)),\
+	(char*)""});
+
 
 #define BEGIN_DEFINE_EXPORT_PYTHON_CLASS(module, cls)\
 	namespace easy_python_export\
@@ -230,9 +285,11 @@ namespace easy_python_export_helper
 		   PyType_GenericNew,                \
 		};\
 		auto &type_class = _PYTHON_EXPORT_HELPER_PYTHON_TYPE_NAME(module, cls);\
-		static easy_python_export_helper::PythonExportCollector::NormalMethods normal_methods;\
+		static easy_python_export_helper::PythonExportCollector::Methods methods;\
+		static easy_python_export_helper::PythonExportCollector::Properties properties;\
 		easy_python_export_helper::PythonExportCollector collector(\
-			normal_methods,\
+			methods,\
+			properties,\
 			type_class\
 		);\
 		auto module_str = _PYTHON_EXPORT_HELPER_STRING(module);\
